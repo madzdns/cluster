@@ -1,2 +1,2 @@
 Manifest-Version: 1.0
-Main-Class: app.Bootstrap
+Main-Class: com.github.madzdns.server.app.Bootstrap

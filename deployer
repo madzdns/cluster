@@ -75,7 +75,7 @@ Creating $app.jar package"
 
 cat <<EOM >manif
 Manifest-Version: 1.0
-Main-Class: app.Bootstrap
+Main-Class: Bootstrap
 EOM
 
 jar cvfm ../$root/$app.jar manif $bootstrap_pkg/*.class

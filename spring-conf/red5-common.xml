@@ -148,7 +148,7 @@
 	
 	<!-- ClientBroadcastStream and PlaylistSubscriberStream
 		that will be used by RTMPConnection and maybe other classes.
-		These beans are lazy-init because most likely server will need
+		These beans are lazy-init because most likely core will need
 		to be up and running before we can get a smart implementation
 		of these streams
 	-->
@@ -158,8 +158,8 @@
 		  -->
 		<property name="bufferCheckInterval" value="${subscriberstream.buffer.check.interval}"/>
 		<!-- A NetStream.Play.InsufficientBW message is generated if more than X messages are queued for sending on the connection.
-		     This value will also control the maximum pending messages on the server. To use a smaller value on slow connections
-		     to get smaller delay for downstream server commands.
+		     This value will also control the maximum pending messages on the core. To use a smaller value on slow connections
+		     to get smaller delay for downstream core commands.
 		  -->
 		<property name="underrunTrigger" value="${subscriberstream.underrun.trigger}"/>
 	</bean>

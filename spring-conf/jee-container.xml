@@ -51,17 +51,17 @@
  
     <!-- Tomcat with SSL enabled -->
 <!-- 
-    <bean id="tomcat.server" class="org.red5.server.tomcat.TomcatLoader" depends-on="context.loader" init-method="start" lazy-init="true">
+    <bean id="tomcat.core" class="org.red5.core.tomcat.TomcatLoader" depends-on="context.loader" init-method="start" lazy-init="true">
         <property name="webappFolder" value="${red5.root}/webapps" />
         
         <property name="connectors">
             <list>
-                <bean name="httpConnector" class="org.red5.server.tomcat.TomcatConnector">
+                <bean name="httpConnector" class="org.red5.core.tomcat.TomcatConnector">
                     <property name="protocol" value="org.apache.coyote.http11.Http11NioProtocol" />
                     <property name="address" value="${http.host}:${http.port}" />
                     <property name="redirectPort" value="${https.port}" />  
                 </bean>
-                <bean name="httpsConnector" class="org.red5.server.tomcat.TomcatConnector">
+                <bean name="httpsConnector" class="org.red5.core.tomcat.TomcatConnector">
                     <property name="secure" value="true" />
                     <property name="protocol" value="org.apache.coyote.http11.Http11NioProtocol" />
                     <property name="address" value="${http.host}:${https.port}" />

@@ -28,7 +28,7 @@
     <bean id="rtmpCodecFactory" class="org.red5.server.net.rtmp.codec.RTMPMinaCodecFactory"/>
 	    
 	<!-- RTMP Handler -->
-	<bean id="rtmpHandler" class="rtmp.handler.RTMPRedirectHandler">
+	<bean id="rtmpHandler" class="com.github.madzdns.server.rtmp.handler.RTMPRedirectHandler">
 		<property name="server" ref="red5.server" />
 		<property name="statusObjectService" ref="statusObjectService" />
 		<!-- Enable this if you want to allow global scope connections
@@ -37,13 +37,13 @@
 	</bean>
 	
 	<!-- RTMP Mina IO Handler -->
-	<bean id="rtmpMinaIoHandler" class="rtmp.handler.RTMPRedirectMinaHandler">
+	<bean id="rtmpMinaIoHandler" class="com.github.madzdns.server.rtmp.handler.RTMPRedirectMinaHandler">
 		<property name="handler" ref="rtmpHandler" />
         <property name="codecFactory" ref="rtmpCodecFactory" />
 	</bean>
 	
 	<!-- RTMP Mina Transport
-	<bean id="rtmpTransport" class="org.red5.server.net.rtmp.RTMPMinaTransport" init-method="start" destroy-method="stop">
+	<bean id="rtmpTransport" class="org.red5.core.net.rtmp.RTMPMinaTransport" init-method="start" destroy-method="stop">
 		<property name="ioHandler" ref="rtmpMinaIoHandler" />
         <property name="addresses">
             <list>
@@ -84,13 +84,13 @@
 		<property name="maxInactivity" value="${rtmp.max_inactivity}" />
 		<!-- Max. time in milliseconds to wait for a valid handshake. -->
 		<property name="maxHandshakeTimeout" value="${rtmp.max_handshake_time}" />
-        <!-- Default server bandwidth per connection -->
+        <!-- Default core bandwidth per connection -->
         <property name="defaultServerBandwidth" value="${rtmp.default_server_bandwidth}" />
         <!-- Default client bandwidth per connection -->
         <property name="defaultClientBandwidth" value="${rtmp.default_client_bandwidth}" />
         <!-- Client bandwidth limit type: 0 = hard, 1 = soft, 2 = dynamic -->
         <property name="limitType" value="${rtmp.client_bandwidth_limit_type}" />
-        <!-- Bandwidth detection. If "false" the server will NOT initiate a check -->
+        <!-- Bandwidth detection. If "false" the core will NOT initiate a check -->
         <property name="bandwidthDetection" value="${rtmp.bandwidth_detection}" />
         <!-- Maximum time allowed for a single RTMP packet to be processed -->
         <property name="maxHandlingTimeout" value="${rtmp.max_handling_time}" />
@@ -106,12 +106,12 @@
 	</bean>
 	
 	<!-- RTMPT Mina IO Handler -->
-	<bean id="rtmptMinMinaIoHandler" class="rtmpt.handler.RTMPTRedirectMinaHandler">
+	<bean id="rtmptMinMinaIoHandler" class="com.github.madzdns.server.rtmpt.handler.RTMPTRedirectMinaHandler">
 		<property name="handler" ref="rtmpHandler" />
         <property name="codecFactory" ref="rtmpCodecFactory" />
 	</bean>
 	
-	<bean id="rtmptRedirectHandler" class="rtmpt.handler.RTMPTRedirectHandler" >
+	<bean id="rtmptRedirectHandler" class="com.github.madzdns.server.rtmpt.handler.RTMPTRedirectHandler" >
 		<property name="codecFactory" ref="rtmptCodecFactory" />
 		<property name="statusObjectService" ref="statusObjectService" />
 	</bean>
@@ -142,7 +142,7 @@
 		
    <!-- RTMPS -->
 <!-- 
-    <bean id="rtmpsMinaIoHandler" class="org.red5.server.net.rtmps.RTMPSMinaIoHandler">
+    <bean id="rtmpsMinaIoHandler" class="org.red5.core.net.rtmps.RTMPSMinaIoHandler">
         <property name="handler" ref="rtmpHandler" />
         <property name="codecFactory" ref="rtmpCodecFactory" />
         <property name="keystorePassword" value="${rtmps.keystorepass}" />
@@ -151,7 +151,7 @@
         <property name="truststoreFile" value="${rtmps.truststorefile}" />
     </bean>
     
-    <bean id="rtmpsTransport" class="org.red5.server.net.rtmp.RTMPMinaTransport" init-method="start" destroy-method="stop">
+    <bean id="rtmpsTransport" class="org.red5.core.net.rtmp.RTMPMinaTransport" init-method="start" destroy-method="stop">
         <property name="ioHandler" ref="rtmpsMinaIoHandler" />
 		<property name="addresses">
 		    <list>
@@ -164,7 +164,7 @@
 -->
 
    <!-- Enable when you need it. - - >
-        <bean id="rtmpProxyTransport" class="org.red5.server.net.rtmp.RTMPMinaTransport" init-method="start" destroy-method="stop">
+        <bean id="rtmpProxyTransport" class="org.red5.core.net.rtmp.RTMPMinaTransport" init-method="start" destroy-method="stop">
                 <property name="ioHandler" ref="debugProxyIoHandler" />
                 <property name="address" value="${proxy.source_host}" />
                 <property name="port" value="${proxy.source_port}" />
@@ -173,7 +173,7 @@
         </bean>
     
         <bean id="debugProxyIoHandler"
-                class="org.red5.server.net.proxy.DebugProxyHandler">
+                class="org.red5.core.net.proxy.DebugProxyHandler">
                 <property name="codecFactory" ref="rtmpCodecFactory" />
                 <property name="forward" value="${proxy.destination_host}:${proxy.destination_port}" />
                 <property name="dumpTo" value="./webapps/dump/" />
