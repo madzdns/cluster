@@ -12,3 +12,4 @@ build
 .settings
 
 GeoLite2-City.mmdb
+log/server*
