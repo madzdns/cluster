@@ -1,0 +1,570 @@
+#! /bin/bash
+
+app="app"
+lib="frfra"
+root="Frfra"
+bootstrap_pkg="app"
+conf=$lib".xml"
+lib_folder="lib"
+key_folder="keys"
+res_folder="res"
+spring_conf_folder="spring-conf"
+geodb="GeoLite2-City.mmdb"
+exec=$lib".run"
+log4jconf="log4j.properties"
+logbackconf="logback.xml"
+INITScriptPath="/etc/init.d"
+Description="Frfra server"
+INSTALLER_PATH=""
+LICENSE_FILE="Frfra-v1.0_license_agreement.txt"
+Site_url="frfra.com"
+xmlconf="frfra.xml"
+Notice="NOTICE.txt"
+linux_noticefile="linux.notice"
+kafka_folder="kafka"
+cluster_store="jcs-cache.cfg"
+jars_tmp="jars_tmp.tmp"
+
+if [ "$1" = "" ]
+then
+echo "$0 version_suffix"
+exit
+fi
+
+if [ "$2" = "" ]
+then
+	echo "$0 version_suffix deploy_config_file"
+	exit
+fi
+
+if [ ! -e "$2" ]; then
+	echo "could not find $2"
+	exit
+fi
+
+deploy_xmlconf="$2"
+
+if [ -d "$root" ]
+then
+	mv $root $root-`date +"%m-%d-%y"`.bak
+fi
+
+mkdir $root
+
+echo "
+Creating $lib-$1 package"
+cd bin/
+
+packz=""
+for pkg in `ls`
+do
+if [ "$pkg" != "$bootstrap_pkg" ]
+then
+packz="$packz $pkg/*"
+fi
+done
+jar cvf ../$lib_folder/$lib-$1.jar $packz
+
+for waste in $(seq 1 100)
+do
+echo -n "."
+sleep 0.01
+done
+echo "
+Creating $app.jar package"
+
+cat <<EOM >manif
+Manifest-Version: 1.0
+Main-Class: app.Bootstrap
+EOM
+
+jar cvfm ../$root/$app.jar manif $bootstrap_pkg/*.class
+
+rm manif
+
+for waste in $(seq 1 100)
+do
+echo -n "."
+sleep 0.01
+done
+echo "
+Moving packages to $root"
+
+cd ..
+
+cp -v -r $lib_folder $xmlconf $log4jconf $logbackconf $exec $geodb $spring_conf_folder $key_folder $kafka_folder $cluster_store $root
+
+cp -v $linux_noticefile $root/$Notice
+
+for waste in $(seq 1 100)
+do
+echo -n "."
+sleep 0.01
+done
+
+INSTALLER_PATH=$root/$root-$1.sh
+echo "
+Creating $INSTALLER_PATH installer"
+
+####
+
+for sp in `ls $root/$spring_conf_folder/`
+do
+if [ -d $root/$spring_conf_folder/$sp ]; then
+sp_confs=$sp_confs"mkdir -p $sp
+cd $sp
+"
+for ssp in `ls $root/$spring_conf_folder/$sp`
+do
+sp_confs=$sp_confs"cat <<\"EOM\" >$ssp
+`cat $root/$spring_conf_folder/$sp/$ssp`
+EOM
+"
+done
+sp_confs=$sp_confs"cd ..
+"
+echo "
+$root/$spring_conf_folder/$sp is a directory"
+else
+sp_confs=$sp_confs"cat <<\"EOM\" >$sp
+`cat $root/$spring_conf_folder/$sp`
+EOM
+"
+fi
+done
+
+for key in `ls $root/$key_folder/`
+do
+keys=$keys"xxd -r <<\"EOM\" >$key
+`xxd $root/$key_folder/$key`
+EOM
+"
+done
+
+for kconf in `ls $root/$kafka_folder/`
+do
+kconfs=$kconfs"cat <<\"EOM\" >$kconf
+`cat $root/$kafka_folder/$kconf`
+EOM
+"
+done
+
+log4jconfcontent=`cat $log4jconf`
+logbackconfcontent=`cat $logbackconf`
+
+#I DECIDED TO NOT ENCLUDE GEODB IN INSTALLER
+#geodbcontent=`xxd $geodb`
+
+appjar=`xxd $root/$app.jar`
+
+xmlconfcontent=`cat $deploy_xmlconf`
+
+cluster_store_content=`cat $cluster_store`
+
+NoticeFileContent=`cat $linux_noticefile`
+
+#########
+##Starting installer Script
+########
+
+cat <<EOF >$INSTALLER_PATH
+#!/bin/bash
+root="$root"
+app="$app"
+lib="$lib"
+INSTALLDIR="/usr/local"
+INITScriptPath="$INITScriptPath"
+INITScript="$INITScriptPath/$lib"
+exec="$exec"
+xmlconf="$xmlconf"
+lib_folder="$lib_folder"
+key_folder="$key_folder"
+res_folder="$res_folder"
+spring_conf_folder="$spring_conf_folder"
+version="$1"
+Description="$Description"
+LICENSE_FILE="$LICENSE_FILE"
+Site_url="$Site_url"
+Publisher="$Publisher"
+Notice="$Notice"
+cluster_store="$cluster_store"
+kafka_folder="$kafka_folder"
+EOF
+
+cat <<"EOF" >>$INSTALLER_PATH
+
+LICENSE="
+
+FrFra Cluster Software 
+END USER LICENSE AGREEMENT
+
+“Software” means the software and any additional software features, if any, 
+	that are licensed under this AGREEMENT including, but not limited to,
+	any related components provided with the Software, application programming 
+	interfaces (APIs), associated media, protocols, printed materials, configurations,
+	online or electronic documentation, and any updates and maintenance releases thereto.
+
+THIS SOFTWARE IS AN INTELLECTUAL PROPERTY BELONGS TO FRFRA (FRFRA.COM).
+BY ACCESSING, USING OR JUST KEEPING IT IN ANY CASE, YOU ARE COMPLETELY ARE IN THE VIOLATION
+WITH THIS LICENSE AND SHAL BE LIABLE"
+
+more <<EOM
+$LICENSE
+EOM
+
+if [ `whoami` != "root" ]
+then
+	echo "Please run this as root(sudo/su) to avoid any mess up"
+	exit
+fi
+if [ "$1" != "" ]
+then
+	INSTALLDIR=`echo "$1" | sed 's#/$##'`
+fi
+
+if [ ! -d "$INSTALLDIR" ]
+then
+	echo "$INSTALLDIR does not exist"
+	exit	
+fi
+
+if [ ! -d "$INITScriptPath" ]
+then
+	echo "$INITScriptPath does not exist"
+	exit	
+fi
+
+while [ 1 -eq 1 ]; do
+	
+	echo "Do you agree to the above license terms?[yes or no]"
+	read RESPONCE
+	case $RESPONCE in
+		yes) break ;;
+		no) exit ;;
+	esac
+done
+
+TIPS="$lib successfully installed on $INSTALLDIR/$root\nTo start as daemon service use\n$INITScriptPath/$lib start\nDO NOT FORGET TO EDIT $INSTALLDIR/$root/$xmlconf FOR YOUR CASE\nAFTER EVERY START OR UNPLANNED STOP PLEASE CHECK $INSTALLDIR/$root/log/ TO SEE IF THERE IS A PROBLEM TO BE SOLVED\n
+Checkout Documentations at $Site_url\n. DO NOT FORGET TO CHOOSE AN UNIQ ID AND THEN RESET KEYCHAIN. ALSO MAKE SURE THAT GEO DATABASE EXISTS AND
+IS UPTODATE. Thank you"
+
+
+root="$INSTALLDIR/$root"
+
+if [ -d "$root-$version" ]
+then
+	echo "$root-$version already exists. Please run $root-$version/uninstall.sh first"
+	exit	
+fi
+
+mkdir -p $root-$version
+
+cd $root-$version
+
+mkdir -p $lib_folder
+
+mkdir -p $key_folder
+
+mkdir -p $res_folder
+
+mkdir -p $spring_conf_folder
+
+mkdir -p $kafka_folder
+
+cat <<"EOM" >$exec
+#!/bin/bash
+
+for JAVA in "${JAVA_HOME}/bin/java" "${JAVA_HOME}/Home/bin/java" "/usr/bin/java" "/usr/local/bin/java" "/usr/local/sbin"
+do
+  if [ -x "$JAVA" ]
+  then
+    break
+  fi
+done
+
+if [ ! -x "$JAVA" ]
+then
+  echo "Unable to locate Java. Please set JAVA_HOME environment variable."
+  exit
+fi
+
+#export JAVA_OPTS="Java opts here"
+exec "$JAVA" -cp $PATH:.:lib/*:app.jar app/Bootstrap
+EOM
+chmod +x $exec
+
+cat <<EOM >uninstall.sh
+#!/bin/bash
+
+while [ 1 -eq 1 ]; do
+	
+	echo "This will completly remove $root-$version. Are you sure?[yes or no]"
+	read RESPONCE
+EOM
+cat <<"EOM" >>uninstall.sh
+	case $RESPONCE in
+		yes) break ;;
+		no) exit ;;
+	esac
+done
+EOM
+cat <<EOM >>uninstall.sh
+$INITScriptPath/$lib stop >/dev/null 2>&1
+rm /var/run/$lib/$lib.pid >/dev/null 2>&1
+if hash insserv 2>/dev/null; then
+   insserv -r $INITScript 2>/dev/null
+fi
+rm $INITScript
+rm -r $root-$version
+rm $root
+echo "$root-$version successfully removed"
+EOM
+chmod +x uninstall.sh
+
+cat <<"EOM" >$INITScript
+#! /bin/bash
+#
+# Author:      frfra project
+#
+### BEGIN INIT INFO
+# Provides:          frfra
+# Required-Start:	 $syslog $time $local_fs $remote_fs $network
+# Required-Stop:	 $syslog $time $local_fs $remote_fs
+EOM
+cat <<EOM >>$INITScript
+# chkconfig: 		 345 85 15
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6 S
+# Short-Description: Controls Frfra Service as a Linux service.
+# Description:       Controls Frfra Service as a Linux service.
+### END INIT INFO
+
+RETVAL=0
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DESC="$Description"
+NAME="$lib"
+APP_HOME="$root"
+exec="$exec"
+EOM
+cat <<"EOM" >>$INITScript
+DAEMON="$APP_HOME/$exec"
+DAEMON_SHUTDOWN="$APP_HOME/$NAME-shutdown.sh"
+SHUTDOWN_WAIT=-1
+PID_FILE="/var/run/$NAME/$NAME.pid"
+EFFECTIVE_USER="root"
+DAEMON_LOG="$APP_HOME/log/daemon"
+# Gracefully exit if the package has been removed.
+[ -r $DAEMON ] || exit 0
+
+if [ ! -r /var/run/$NAME ]
+then
+	mkdir /var/run/$NAME
+fi
+
+if [ ! -r $APP_HOME/log/ ]
+then
+	mkdir $APP_HOME/log/
+fi
+
+# Read config file if it is present.
+if [ -r /etc/default/$NAME ]
+then
+    . /etc/default/$NAME
+fi
+
+#
+#    Function that starts the daemon/service.
+#
+d_start() {
+    if [ -f $PID_FILE ]; then
+        APPPID=`cat $PID_FILE`
+        APPRUNNING=`ps -fp $APPPID | grep $APPPID`
+		if [ "$APPRUNNING" != "" ]; then
+            echo -n -e "\nCan't start daemon; already active (PID $APPPID)">&2
+            echo ""
+            return 0
+        else
+            echo -n -e "\nCan't start daemon; not active, but PID file ($PID_FILE) has not been deleted.">&2
+            return 1
+        fi
+    else
+		touch $PID_FILE
+    fi
+    
+    if [ -r "$DAEMON_LOG.log" ]
+    then
+    	mv "$DAEMON_LOG.log" "$DAEMON_LOG"_`date -u | sed "s/\s/_/g"`.log
+    fi
+    
+    cd $APP_HOME
+    
+    #export LD_LIBRARY_PATH=$DAEMON_HOME/
+		#su -c "$DAEMON > $DAEMON_LOG.log 2>&1 & /bin/echo \$! > $PID_FILE" $EFFECTIVE_USER
+    su -c "$DAEMON > /dev/null 2>&1 & /bin/echo \$! > $PID_FILE" $EFFECTIVE_USER
+    progress
+    APPPID=`cat $PID_FILE`
+    APPRUNNING=`ps -fp $APPPID | grep $APPPID`
+    if [ "$APPRUNNING" == "" ]; then
+            rm $PID_FILE;
+            echo -n -e " failed"
+    else
+            echo -n -e " ok"
+    fi
+    return 0
+}
+
+#
+#    Function that stops the daemon/service.
+#
+d_stop() {
+   [ -r $PID_FILE ] || echo "already stoped ">&2
+   [ -r $PID_FILE ] ||	return 0
+    #$DAEMON_SHUTDOWN
+    let kwait=$SHUTDOWN_WAIT
+    count=0;
+    kpid=`cat $PID_FILE`
+    until [ `ps -p $kpid | grep -c $kpid` = '0' ] || [ $count -gt $kwait ]
+    do
+    	progress
+	let count=$count+1;
+    done
+    if [ -n $kpid ]; then
+		echo -n -e "\nforcing to kill process $kpid " >&2
+		kill $kpid
+		progress
+    fi
+
+    rm $PID_FILE
+    echo -n -e " ok"
+    return 0
+}
+progress(){
+	for waste in $(seq 1 3)
+	do
+		echo -n "."
+		sleep 1
+	done
+}
+
+case "$1" in
+  start)
+    echo -n "Starting $DESC: $NAME "
+    d_start
+    echo "."
+    ;;
+  stop)
+    echo -n "Stopping $DESC: $NAME "
+    d_stop
+    echo "."
+    ;;
+  restart|force-reload)
+    echo -n "Restarting $DESC: $NAME "
+    d_stop
+    sleep 1
+    echo "."
+    d_start
+    echo "."
+    ;;
+  *)
+    echo "Usage: $NAME {start|stop|restart|force-reload}" >&2
+    exit 1
+    ;;
+esac
+
+exit 0
+EOM
+chmod +x $INITScript
+
+if hash insserv 2>/dev/null; then
+   insserv $INITScript 2>/dev/null
+fi
+EOF
+
+cat <<EOF >>$INSTALLER_PATH
+
+cat <<"EOM" >$xmlconf
+$xmlconfcontent
+EOM
+
+cat <<"EOM" >$Notice
+$NoticeFileContent
+EOM
+
+cat <<"EOM" >$log4jconf
+$log4jconfcontent
+EOM
+
+cat <<"EOM" >$logbackconf
+$logbackconfcontent
+EOM
+
+cat <<"EOM" >$cluster_store
+$cluster_store_content
+EOM
+
+#I DECIDED TO NOT INCLUDE GEODB IN INSTALLER
+#cat <<"EOM" >$geodb
+#xdd -r $geodbcontent
+#EOM
+
+xxd -r <<"EOM" >$app.jar
+$appjar
+EOM
+
+EOF
+
+cat <<"EOF" >>$INSTALLER_PATH
+cd $spring_conf_folder
+EOF
+
+cat <<EOF >>$INSTALLER_PATH
+$sp_confs
+EOF
+
+cat <<"EOF" >>$INSTALLER_PATH
+cd ../$key_folder
+EOF
+
+cat <<EOF >>$INSTALLER_PATH
+$keys
+EOF
+
+cat <<"EOF" >>$INSTALLER_PATH
+cd ../$kafka_folder
+EOF
+
+cat <<EOF >>$INSTALLER_PATH
+$kconfs
+EOF
+
+cat <<"EOF" >> $INSTALLER_PATH
+cd ..
+EOF
+
+cat <<"EOF" >>$INSTALLER_PATH
+cat <<EOM >$LICENSE_FILE
+$LICENSE
+EOM
+cd $lib_folder
+EOF
+
+#cat <<EOF >>$INSTALLER_PATH
+#$jars
+#EOF
+
+for jar in `ls $root/$lib_folder/ | grep .jar`
+do
+cat <<EOF >>$INSTALLER_PATH
+xxd -r <<"EOM" >$jar
+`xxd $root/$lib_folder/$jar`
+EOM
+EOF
+done
+
+cat <<"EOF" >>$INSTALLER_PATH
+ln -s $root-$version $root
+echo -e $TIPS
+EOF
+chmod +x $INSTALLER_PATH
+
+echo "done"

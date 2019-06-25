@@ -1,0 +1,126 @@
+#! /bin/bash
+#
+# chkconfig: 345 85 15
+# description: Controls Pen loadbalancer backend server as a Linux service.
+#
+# penlbb         penlbb initscript
+#
+# Author:      mohamad zeinali <mohammad.zeinali@gmail.com>
+#
+
+RETVAL=0
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DESC="Frfra Head server"
+NAME=frfra
+APP_HOME="/opt/Frfra"
+DAEMON="$APP_HOME/$NAME.run"
+DAEMON_SHUTDOWN="$APP_HOME/$NAME-shutdown.sh"
+SHUTDOWN_WAIT=-1
+PID_FILE="/var/run/$NAME/$NAME.pid"
+EFFECTIVE_USER="root"
+CONSOLE_LOG="$APP_HOME/log/console"
+# Gracefully exit if the package has been removed.
+[ -r $DAEMON ] || exit 0
+
+if [ ! -r /var/run/$NAME ]
+then
+	mkdir /var/run/$NAME
+fi
+
+if [ ! -r $PENLBB_HOME/log/ ]
+then
+	mkdir $PENLBB_HOME/log/
+fi
+
+# Read config file if it is present.
+if [ -r /etc/default/$NAME ]
+then
+    . /etc/default/$NAME
+fi
+
+#
+#    Function that starts the daemon/service.
+#
+d_start() {
+    if [ -f $PID_FILE ]; then
+        APPPID=`cat $PID_FILE`
+        APPRUNNING=`ps -fp $APPPID | grep $APPPID`
+	if [ "$APPRUNNING" != "" ]; then
+            echo "Can't start penlbb; already active (PID $APPPID)..."
+            return 0
+        else
+            echo "Can't start penlbb; not active, but PID file ($PID_FILE) has not been deleted."
+            return 1
+        fi
+    else
+	touch $PID_FILE
+    fi
+    
+    if [ -r "$CONSOLE_LOG.log" ]
+    then
+    	mv "$CONSOLE_LOG.log" "$CONSOLE_LOG"_`date -u | sed "s/\s/_/g"`.log
+    fi
+    
+    cd $PENLBB_HOME
+    
+    #export LD_LIBRARY_PATH=$PENLBB_HOME/
+
+    su -c "$APP_HOME/$DAEMON > $APP_HOME/log/console.log 2>&1 & /bin/echo \$! > $PID_FILE" $EFFECTIVE_USER
+    RETVAL=$?
+    echo
+    return $RETVAL
+}
+
+#
+#    Function that stops the daemon/service.
+#
+d_stop() {
+   [ -r $PID_FILE ] || echo "already stoped ..."
+   [ -r $PID_FILE ] ||	return 0
+    #$DAEMON_SHUTDOWN
+    let kwait=$SHUTDOWN_WAIT
+    count=0;
+    kpid=`cat $PID_FILE`
+    until [ `ps -p $kpid | grep -c $kpid` = '0' ] || [ $count -gt $kwait ]
+    do
+    	echo -n -e "\nwaiting for processes to exit";
+	sleep 1
+	let count=$count+1;
+    done
+    if [ -n $kpid ]; then
+	echo -n -e "\nkilling processes $kpid ..."
+	kill $kpid
+    fi
+
+    rm $PID_FILE
+    return 0
+}
+
+case "$1" in
+  start)
+    echo -n "Starting $DESC: $NAME"
+    echo
+    d_start
+    echo "."
+    ;;
+  stop)
+    echo -n "Stopping $DESC: $NAME"
+    echo
+    d_stop
+    echo "."
+    ;;
+  restart|force-reload)
+    echo -n "Restarting $DESC: $NAME"
+    echo
+    d_stop
+    sleep 1
+    d_start
+    echo "."
+    ;;
+  *)
+    echo "Usage: $SCRIPTNAME {start|stop|restart|force-reload}" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

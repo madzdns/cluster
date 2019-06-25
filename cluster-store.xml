@@ -1,0 +1,10 @@
+<ehcache name="clusterManager">
+	<diskStore path="eh-cluster"/>
+	<defaultCache
+	    overflowToDisk="true"
+	    diskPersistent="true"
+	    maxElementsInMemory="10000"
+	    maxElementsOnDisk="1000000000"
+	    eternal="true">
+	</defaultCache>
+</ehcache>

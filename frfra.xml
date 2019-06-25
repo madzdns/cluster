@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<app id="1" verbose="false">
+	<name>Frfra Server</name>
+	<version>2.2.5</version>
+	<geo>GeoLite2-City.mmdb</geo>
+	<apiprefix>frfra</apiprefix>
+	
+	<cname-ok-lookup-ttl>10800</cname-ok-lookup-ttl>
+	<cname-fail-lookup-ttl>1800</cname-fail-lookup-ttl>
+	
+	<ns-ok-lookup-ttl>43200</ns-ok-lookup-ttl>
+	<ns-fail-lookup-ttl>1800</ns-fail-lookup-ttl>
+	
+	<nameserver-conf-str>--NameserverConfig,</nameserver-conf-str>
+
+	<ns-check>true</ns-check>
+	<cluster-type>frsynch</cluster-type>
+	<api-call-proto>http</api-call-proto>
+	<request-count-api-path>/Settings/updateRequestCount</request-count-api-path>
+	<request-count-inc-cond>10</request-count-inc-cond>
+
+	<serv-ssl>true</serv-ssl>
+
+	<ssl-config>
+		<keystore-pass>123456</keystore-pass>
+		<truststore-pass>7891011</truststore-pass>
+		<keystore-pass-2>12131415</keystore-pass-2>
+		<keystore>v2.keystore</keystore>
+		<truststore>v2.truststore</truststore>
+		<certificate>v2.public.cert</certificate>
+	</ssl-config>
+
+	<binds>
+		<bind service="dns">
+			<socket>127.0.0.1:2253</socket>
+		</bind>
+		<bind service="rtmp">
+			<socket>127.0.0.1:1945</socket>
+			<socket>127.0.0.1:1946</socket>
+		</bind>
+		<bind service="rtsp">
+			<socket>127.0.0.1:22554</socket>
+		</bind>
+		<bind service="http">
+			<socket>127.0.0.1:2288</socket>
+		</bind>
+		<bind service="backend">
+			<socket>127.0.0.1:22543</socket>
+			<socket>127.0.0.1:22553</socket>
+			<socket>127.0.0.1:22548</socket>
+			<socket>127.0.0.1:22558</socket>
+		</bind>
+		<bind service="synch">
+			<socket>127.0.0.1:22853</socket>
+			<socket>127.0.0.1:22852</socket>
+		</bind>
+		<bind service="webservice">
+			<socket>127.0.0.1:8081</socket>
+		</bind>
+	</binds>
+</app>

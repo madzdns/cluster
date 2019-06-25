@@ -1,0 +1,5 @@
+#! /bin/bash
+
+#java -cp 'bin/:lib/*:/mnt/1/Lunoworkplace/Frsynch/bin' app/Bootstrap
+
+java -cp 'bin/:lib/*' app/Bootstrap

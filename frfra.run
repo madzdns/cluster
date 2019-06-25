@@ -1,0 +1,18 @@
+#!/bin/bash
+
+for JAVA in "${JAVA_HOME}/bin/java" "${JAVA_HOME}/Home/bin/java" "/usr/bin/java" "/usr/local/bin/java" "/usr/local/sbin"
+do
+  if [ -x "$JAVA" ]
+  then
+    break
+  fi
+done
+
+if [ ! -x "$JAVA" ]
+then
+  echo "Unable to locate Java. Please set JAVA_HOME environment variable."
+  exit
+fi
+
+#export JAVA_OPTS="-Xrs -Xms20480M -Xmx40960M -Dsun.rmi.dgc.client.gcInterval=300000 -Dsun.rmi.dgc.server.gcInterval=360000 -Djava.net.preferIPv4Stack=true -XX:+ExplicitGCInvokesConcurrent -XX:+UseConcMarkSweepGC -Xverify:none"
+exec "$JAVA" -cp $PATH:.:lib/*:app.jar app/Bootstrap
