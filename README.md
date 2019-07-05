@@ -1,6 +1,6 @@
-#What is MadzDns?
+# What is MadzDns?
 
-MadzDNS is a layer 7 DSR (Direct Server Return) load balancer acting as a service.
+## MadzDNS is a layer 7 DSR (Direct Server Return) load balancer acting as a service.
 It is very configurable and has many additional features.
 
 For example, for some protocols, It quickly acts as 
@@ -12,7 +12,7 @@ It also cares about geographical distributions.<br>
 
 Following is the illustration of MadzDNS's solution:<br><br>
 
-![MadzDNS distribution](https://raw.githubusercontent.com/madzdns/cluster/master/frfra_solution.png)
+![MadzDNS distribution](/madzdns/cluster/blob/master/madzvpn_solution.png?raw=true)
 <br>
 
 At the above picture, Active load balancers are MadzDNS's Cluster. 
