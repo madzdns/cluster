@@ -21,10 +21,9 @@ Servers 1-4 belong to customers. The servers join to MadzDNS's network as connec
 load-balancers are all active at the same time acting as a cluster. 
 Requests to customer's servers will arrive to these load-balancers and then redirected to the proper server. 
 
-Here, the algorithm is much efficient. MadzDNS distributes load with calculating multiple factors such as the 
+<b>Here, the algorithm is much efficient. MadzDNS distributes load with calculating multiple factors such as the 
 server's `CPU` load, `Memory` load, `Network` load in bottle necks, Service type, Physical Location of requesting user relative to servers, 
-The time of requests! Different routing paths to servers, Server availability, Service availability and all of these stuff are amazingly configurable.<br>
----------------------------------
+The time of requests! Different routing paths to servers, Server availability, Service availability and all of these stuff are amazingly configurable.</b>
 
 MadzDNS cluster, has a fast algorithm to calculate different parameters for servers and based on the limits you have configured will decide what would be the best among your servers to process current request.<br>
 When a request comes to one of the load-balancers, it uses the last fresh data collected from the servers. Thus, a failed node would not affect loading time of your service. At the shown picture, a request from North America can be serverd by the Server 3 to make your service much efficient and faster.
@@ -52,7 +51,7 @@ In DNS, dns request comes to MadzDNS and are rerouted to the proper servers. In 
 
 If a client requests from india, DNS server only picks a nearby server and don't checks to see if that server is proper or not. MadzDNS has integerated GDNS to its resource management capabilites and thus it is solved in our solution. 
 
-###We have also a way to determine what is the actual service after dns resolution and check if that service is alive in the servers before rerouting. load-balancing in dns level have some advantages and that is being transparent of underling service. 
+<br>We have also a way to determine what is the actual service after dns resolution and check if that service is alive in the servers before rerouting. load-balancing in dns level have some advantages and that is being transparent of underling service.</b> 
 
 A user requests an address that is serving by MadzDNS, then MadzDNS gets the request and choose the best possible server and answers with the ip address(s) of proper server(s).<br>
 
