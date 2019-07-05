@@ -51,7 +51,7 @@ In DNS, dns request comes to MadzDNS and are rerouted to the proper servers. In 
 
 If a client requests from india, DNS server only picks a nearby server and don't checks to see if that server is proper or not. MadzDNS has integerated GDNS to its resource management capabilites and thus it is solved in our solution. 
 
-<br>We have also a way to determine what is the actual service after dns resolution and check if that service is alive in the servers before rerouting. load-balancing in dns level have some advantages and that is being transparent of underling service.</b> 
+<b>We have also a way to determine what is the actual service after dns resolution and check if that service is alive in the servers before rerouting. load-balancing in dns level have some advantages and that is being transparent of underling service.</b> 
 
 A user requests an address that is serving by MadzDNS, then MadzDNS gets the request and choose the best possible server and answers with the ip address(s) of proper server(s).<br>
 
