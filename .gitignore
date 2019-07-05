@@ -13,3 +13,5 @@ build
 
 GeoLite2-City.mmdb
 log/server*
+jcs-data/
+!jcs-data/.gitkeep
