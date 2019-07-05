@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.madzdns</groupId>
-    <artifactId>server</artifactId>
+    <artifactId>cluster</artifactId>
     <version>1.0-SNAPSHOT</version>
 
     <properties>
