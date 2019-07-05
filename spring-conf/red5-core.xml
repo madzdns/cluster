@@ -28,7 +28,7 @@
     <bean id="rtmpCodecFactory" class="org.red5.server.net.rtmp.codec.RTMPMinaCodecFactory"/>
 	    
 	<!-- RTMP Handler -->
-	<bean id="rtmpHandler" class="com.github.madzdns.server.rtmp.handler.RTMPRedirectHandler">
+	<bean id="rtmpHandler" class="com.github.madzdns.cluster.rtmp.handler.RTMPRedirectHandler">
 		<property name="server" ref="red5.server" />
 		<property name="statusObjectService" ref="statusObjectService" />
 		<!-- Enable this if you want to allow global scope connections
@@ -37,7 +37,7 @@
 	</bean>
 	
 	<!-- RTMP Mina IO Handler -->
-	<bean id="rtmpMinaIoHandler" class="com.github.madzdns.server.rtmp.handler.RTMPRedirectMinaHandler">
+	<bean id="rtmpMinaIoHandler" class="com.github.madzdns.cluster.rtmp.handler.RTMPRedirectMinaHandler">
 		<property name="handler" ref="rtmpHandler" />
         <property name="codecFactory" ref="rtmpCodecFactory" />
 	</bean>
@@ -106,12 +106,12 @@
 	</bean>
 	
 	<!-- RTMPT Mina IO Handler -->
-	<bean id="rtmptMinMinaIoHandler" class="com.github.madzdns.server.rtmpt.handler.RTMPTRedirectMinaHandler">
+	<bean id="rtmptMinMinaIoHandler" class="com.github.madzdns.cluster.rtmpt.handler.RTMPTRedirectMinaHandler">
 		<property name="handler" ref="rtmpHandler" />
         <property name="codecFactory" ref="rtmpCodecFactory" />
 	</bean>
 	
-	<bean id="rtmptRedirectHandler" class="com.github.madzdns.server.rtmpt.handler.RTMPTRedirectHandler" >
+	<bean id="rtmptRedirectHandler" class="com.github.madzdns.cluster.rtmpt.handler.RTMPTRedirectHandler" >
 		<property name="codecFactory" ref="rtmptCodecFactory" />
 		<property name="statusObjectService" ref="statusObjectService" />
 	</bean>

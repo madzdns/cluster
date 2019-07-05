@@ -1,0 +1,6 @@
+package com.github.madzdns.cluster.rtsp;
+
+public enum Verb {
+	
+	None,ANNOUNCE,DESCRIBE,GET_PARAMETER,OPTIONS,PAUSE,PLAY,RECORD,REDIRECT,SETUP,SET_PARAMETER,TEARDOWN
+};
