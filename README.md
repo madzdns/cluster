@@ -12,7 +12,7 @@ It also cares about geographical distributions.<br>
 
 Following is the illustration of MadzDNS's solution:<br>
 
-![MadzDNS distribution](/madzdns/cluster/blob/master/madzvpn_solution.png?raw=true)
+<img src="/madzdns/cluster/blob/master/madzvpn_solution.png?raw=true">
 
 <br>
 
